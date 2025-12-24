@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "minesweeper-solver"
+version = "0.1.0"
+description = "A logic-based Minesweeper solver with backtracking and heuristics"
+readme = "README.md"
+authors = [{ name = "hopesofbuzzy", email = "nurbaevdaniar0@yandex.ru" }]
+license = { text = "MIT" }
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Education",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Games/Entertainment :: Puzzle Games",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+requires-python = ">=3.9"
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/hopesofbuzzy/minesweeper-solver"
+Repository = "https://github.com/hopesofbuzzy/minesweeper-solver"
+
+[project.scripts]
+minesweeper-solver = "minesweeper_solver.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["minesweeper_solver*"]
