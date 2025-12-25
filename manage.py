@@ -1,19 +1,9 @@
-from src.generator import Generator
-from src.solver import Solver
+from src.model.field import Field
 
 
 def main():
-    while True:
-        try:
-            enter = input(">> ").split(" ")
-            match enter[0]:
-                case "generate":
-                    x = int(enter[1])
-                    y = int(enter[2])
-                    field = Generator.auto_generate(x, y)
-                    Solver.solve(field)
-        except Exception as e:
-            print(e)
+    field = Field(3, 3)
+    print(field.open(0, 1))
 
 
 if __name__ == "__main__":
