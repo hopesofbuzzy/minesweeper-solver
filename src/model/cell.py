@@ -18,19 +18,19 @@ class Cell:
         self.rtype = rtype  # Реальный тип
         self.value = 0
 
-    def open(self):
+    def open(self) -> None:
         self.vtype = VCellType.OPENED
 
-    def is_opened(self):
+    def is_opened(self) -> bool:
         return self.vtype == VCellType.OPENED
 
-    def is_bombed(self):
+    def is_bombed(self) -> bool:
         return self.rtype == RCellType.BOMBED
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.show()
 
-    def show(self, real=False):
+    def show(self, real=False) -> str:
         if real:
             return ricon[self.rtype]
         else:
@@ -38,4 +38,3 @@ class Cell:
                 return str(self.value)
             else:
                 return vicon[self.vtype]
-            
