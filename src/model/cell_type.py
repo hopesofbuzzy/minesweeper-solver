@@ -2,10 +2,11 @@ from enum import Enum
 
 
 class VCellType(Enum):
-    CLOSED = 1
+    CLOSED = 0
+    OPENED = 1
     FLAGGED = 2
 
 
 class RCellType(Enum):
-    FREE = 1
-    BOMBED = 2
+    SAFE = 0
+    BOMBED = 1
