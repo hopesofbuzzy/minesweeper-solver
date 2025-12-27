@@ -1,40 +1,40 @@
-from src.model.cell_type import VCellType, RCellType
+import logging
+from src.model.cell_state import CellState
 
-vicon = {
-    VCellType.CLOSED: "?",
-    VCellType.OPENED: "",
-    VCellType.FLAGGED: "!"
+visible_chars: dict[CellState, str] = {
+    CellState.CLOSED: "▣",
+    CellState.OPENED: "<adj_mines>",
+    CellState.FLAGGED: "f"
 }
 
-ricon = {
-    RCellType.SAFE: "0",
-    RCellType.BOMBED: "*"
+truth_chars: dict[bool, str] = {
+    True: "*",
+    False: "<adj_mines>"
 }
 
 
 class Cell:
-    def __init__(self, vtype=VCellType.CLOSED, rtype=RCellType.SAFE):
-        self.vtype = vtype  # Видимый тип
-        self.rtype = rtype  # Реальный тип
-        self.value = 0
+    def __init__(self, state=CellState.CLOSED, is_mine=False):
+        self.state = state
+        self.is_mine = is_mine
+        self.adj_mines = 0  # Число клетки
 
     def open(self) -> None:
-        self.vtype = VCellType.OPENED
+        if self.state == CellState.OPENED:
+            logging.error("Клетка уже открыта!")
+        self.state = CellState.OPENED
 
     def is_opened(self) -> bool:
-        return self.vtype == VCellType.OPENED
+        return self.state == CellState.OPENED
 
-    def is_bombed(self) -> bool:
-        return self.rtype == RCellType.BOMBED
-
-    def __str__(self) -> str:
-        return self.show()
-
-    def show(self, real=False) -> str:
-        if real:
-            return ricon[self.rtype]
+    def truth_char(self) -> str:
+        if self.is_mine:
+            return truth_chars[self.is_mine]
         else:
-            if self.vtype is VCellType.OPENED:
-                return str(self.value)
-            else:
-                return vicon[self.vtype]
+            return str(self.adj_mines)
+
+    def visible_char(self):
+        if self.state is CellState.OPENED:
+            return str(self.adj_mines)
+        else:
+            return visible_chars[self.state]
