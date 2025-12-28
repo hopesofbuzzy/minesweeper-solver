@@ -1,5 +1,6 @@
 import logging
 import random
+from src.model.cell import Cell
 from src.model.board import Board
 
 
@@ -10,17 +11,17 @@ class Solver:
 
     def solve(self, board: Board) -> bool:
         """Универсальное решение."""
-        i = 1
+        if not board.first_open():
+            logging.error("Не удалось совершить безопасный первый ход!")
+        logging.info(f"Board solved: {board.is_solved}")
+        logging.info("\n" + board.as_visible())
+        logging.info("\n" + board.as_truth())
         while not board.is_solved:
-            i += 1
             if self.logic_solve(board):
-                return True
+                logging.info("Лог. реш." + "\n" + board.as_visible())
             else:
-                self.prob_solve(board)
-            logging.info("\n" + board.as_visible() + "\n")
-            logging.info(f"Board solved: {board.is_solved}")
-            if i == 3:
-                break
+                logging.info("Логическое решение не справилось!")
+                return False
 
     def logic_solve(self, board: Board) -> bool:
         """Логическое решение."""
@@ -32,22 +33,33 @@ class Solver:
                     n for n in board.get_neighbors(cell.row, cell.col)
                     if not n.is_opened
                 ]
-                flagged_adj = len([n for n in unopened_neighbors if n.is_flagged])
-                closed_adj = len([n for n in unopened_neighbors if n.is_closed])
-                if (flagged_adj + closed_adj) == cell.adj_mines:
+                unopened_adj = len(unopened_neighbors)
+                flagged_adj = len(
+                    [n for n in unopened_neighbors if n.is_flagged]
+                )
+                closed_adj = len(
+                    [n for n in unopened_neighbors if n.is_closed]
+                )
+                # Эвристика 1: флаги=мины => ходим в непомеченные
+                if flagged_adj == cell.adj_mines:
                     for n in unopened_neighbors:
-                        n.flag()
-        logging.info("\n" + board.as_visible() + "\n")
+                        if not n.is_flagged:
+                            board.open(n.row, n.col)
+                            return True
+                # Эвристика 2: неоткрытые=мины => расставл. флаги
+                if unopened_adj == cell.adj_mines:
+                    for n in unopened_neighbors:
+                        if not n.is_flagged:
+                            board.flag(n.row, n.col)
+                            return True
+        return False
 
-    def random_solve(self, board: Board) -> bool:
-        board.open(
-            random.randrange(0, board.rows),
-            random.randrange(0, board.cols)
-        )
-        logging.info("\n" + board.as_visible() + "\n")
+    # # Эвристики
+    # def logic_flag(self, cell: Cell, board: Board):
+    #     """"""
+
 
     def prob_solve(self, board: Board) -> bool:
         """Вероятностное решение."""
         # Заглушка
-        self.random_solve(board)
         return True

@@ -16,50 +16,43 @@ class Board:
         seed: зерно рандома
         mine_prob: вероятность появления бомбы в клетке
     """
-    def __init__(self, rows, cols, seed=42, mine_prob=0.2):
+    def __init__(self, rows, cols, seed=42, mine_prob=0.1):
         self.rows = rows
         self.cols = cols
-        self._field = []
+        self._field = [[Cell(i, j) for j in range(cols)] for i in range(rows)]
         random.seed(seed)
         self._mine_prob = mine_prob
+        self._lay_mines()
+        self._calc_mines()
 
     # Генерация
-    def _auto_generate(self, row, col) -> None:
-        """Автоматическая генерация поля.
-
-        Учитывает первый ход."""
-        field = [[None for _ in range(self.cols)] for _ in range(self.rows)]
-        for i in range(self.rows):
-            for j in range(self.cols):
-                # Первый ход всегда верный.
-                # Важно, чтобы поле вокруг него было чистым.
-                if i in range(row-1, row+2) and j in range(col-1, col+2):
-                    is_mine = False
-                else:
-                    is_mine = random.choices(
-                        [True, False],
-                        [self._mine_prob, 1]
-                    )[0]
-                field[i][j] = Cell(row=i, col=j, is_mine=is_mine)
-        self._field = field
+    def _lay_mines(self) -> None:
+        """Расстановка мин."""
+        for cell in self.all_cells:
+            is_mine = random.choices([True, False], [self._mine_prob, 1])[0]
+            cell._is_mine = is_mine
 
     def _calc_mines(self) -> None:
-        """Высчитывает число каждой клетки (количество бомб соседей)."""
-        for i in range(self.rows):
-            for j in range(self.cols):
-                cell = self.get_cell(i, j)
-                if cell:
-                    cell._adj_mines = sum(
-                        [n._is_mine for n in self.get_neighbors(i, j)]
-                    )
+        """Высчитывает число каждой клетки (количество мин соседей)."""
+        for cell in self.all_cells:
+            if cell:
+                neighbors = self.get_neighbors(cell.row, cell.col)
+                cell._adj_mines = sum([n._is_mine for n in neighbors])
 
     # Действие
+    def first_open(self) -> bool:
+        """Безопасное первое открытие клетки."""
+        for cell in self.all_cells:
+            neighbors = self.get_neighbors(cell.row, cell.col)
+            is_mine = cell._is_mine
+            are_adj_mines = any([n._is_mine for n in neighbors])
+            if not (is_mine or are_adj_mines):
+                self.open(cell.row, cell.col)
+                return True
+        return False
+
     def open(self, row, col) -> bool:
-        """Сделать ход (открыть клетку)."""
-        # Генерируем поле только после первого хода
-        if self.is_empty:
-            self._auto_generate(row, col)
-            self._calc_mines()
+        """Открыть клетку."""
         # Открываем клетку
         cell = self.get_cell(row, col)
         if cell and not cell.is_opened:
@@ -68,19 +61,18 @@ class Board:
                 return False
             else:
                 mines = cell.adj_mines
-                cell.open()
+                cell._open()
                 if not mines:
                     for i in range(row-1, row+2):
                         for j in range(col-1, col+2):
                             self.open(i, j)
-                return True
-        return True
+                    return True
 
     def flag(self, row, col) -> bool:
         """Пометить клетку."""
         cell = self.get_cell(row, col)
         if cell and not cell.is_flagged:
-            cell.flag()
+            cell._flag()
 
     # Вспомогательные функции
     def get_neighbors(self, row, col) -> List[Cell]:
@@ -123,6 +115,7 @@ class Board:
             [cell for cell in self.all_cells if cell.is_closed]
         )
         return (closed_cells == 0) and not self.is_empty
+
     # Вывод
     def as_visible(self) -> str:
         """Вывод игровой доски"""

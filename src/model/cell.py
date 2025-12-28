@@ -21,14 +21,14 @@ class Cell:
         self._is_mine = is_mine
         self._adj_mines = 0  # Число клетки
 
-    def open(self) -> bool:
+    def _open(self) -> bool:
         if self._state == CellState.OPENED:
             logging.error("Клетка уже открыта!")
             return False
         self._state = CellState.OPENED
         return True
 
-    def flag(self) -> bool:
+    def _flag(self) -> bool:
         if self._state == CellState.CLOSED:
             self._state = CellState.FLAGGED
             return True
